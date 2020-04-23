@@ -53,7 +53,6 @@ func receiver(conn *websocket.Conn, key []byte) {
 					log.Println(err)
 				}
 				encrypt, err := server.AesEncrypt([]byte(all), key)
-				fmt.Println(len(encrypt))
 				if err != nil {
 					log.Panicln(err)
 				}
@@ -87,7 +86,6 @@ func work(conn *websocket.Conn, key []byte) {
 				break
 			}
 		}
-		fmt.Println(len(message))
 		decrypt, err := server.AesDecrypt(message, key)
 		if err != nil {
 			log.Println(err)

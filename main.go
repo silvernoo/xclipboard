@@ -14,10 +14,10 @@ func main() {
 	flag.StringVar(&cmd.Server, "s", "", "server address")
 	flag.StringVar(&cmd.Bind, "b", "", "binding address")
 	flag.StringVar(&cmd.Port, "p", "9000", "binding address")
-	flag.StringVar(&key, "k", "2673890", "encrypt key")
+	flag.StringVar(&key, "k", "&*……UJM·12", "encrypt key")
 	flag.StringVar(&cmd.User, "u", "default", "user")
 	flag.Parse()
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 32)
 	copy(bytes, []byte(key))
 	cmd.Key = bytes
 	if cmd.IsServerMode() {

@@ -28,7 +28,7 @@ func receiver() {
 		case message := <-set.MessageChan:
 			conns := set.Conns(message.User)
 			for _, c := range conns {
-				err := c.WriteMessage(websocket.TextMessage, []byte(string(message.RawContent)+"update"))
+				err := c.WriteMessage(websocket.TextMessage, []byte(string(message.RawContent)))
 				if err != nil {
 					log.Println("write:", err)
 				}

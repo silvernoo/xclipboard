@@ -32,11 +32,11 @@ func (c *Client) Start() {
 	}
 	log.Printf("connected to %s", u.String())
 	defer conn.Close()
-	go work(conn)
-	receiver(conn)
+	go work(conn, c.Cmd.Key)
+	receiver(conn, c.Cmd.Key)
 }
 
-func receiver(conn *websocket.Conn) {
+func receiver(conn *websocket.Conn, key []byte) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 	ticker := time.NewTicker(time.Second)
@@ -52,7 +52,12 @@ func receiver(conn *websocket.Conn) {
 				if err != nil {
 					log.Println(err)
 				}
-				err = conn.WriteMessage(websocket.TextMessage, []byte(all))
+				encrypt, err := server.AesEncrypt([]byte(all), key)
+				fmt.Println(len(encrypt))
+				if err != nil {
+					log.Panicln(err)
+				}
+				err = conn.WriteMessage(websocket.TextMessage, encrypt)
 				lastText = all
 				if err != nil {
 					log.Println(err)
@@ -73,7 +78,7 @@ func receiver(conn *websocket.Conn) {
 	}
 }
 
-func work(conn *websocket.Conn) {
+func work(conn *websocket.Conn, key []byte) {
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
@@ -82,16 +87,21 @@ func work(conn *websocket.Conn) {
 				break
 			}
 		}
-		s := string(message)
+		fmt.Println(len(message))
+		decrypt, err := server.AesDecrypt(message, key)
+		if err != nil {
+			log.Println(err)
+		}
+		s := string(decrypt)
 		if s != lastText {
 			err := clipboard.WriteAll(s)
-			log.Printf("recv: %s apply", message)
+			log.Printf("recv: %s apply", decrypt)
 			if err != nil {
 				log.Println(err)
 			}
 			lastText = s
 		} else {
-			log.Printf("recv: %s ignore", message)
+			log.Printf("recv: %s ignore", decrypt)
 		}
 	}
 }

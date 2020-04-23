@@ -16,11 +16,10 @@ var (
 )
 
 func (s *Server) Start() {
-	defer close(set.CloseChan)
-	defer close(set.MessageChan)
+	defer set.Close()
 	go receiver()
 	http.HandleFunc("/", handle)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", s.Cmd.Server, s.Cmd.Port), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", s.Cmd.Bind, s.Cmd.Port), nil))
 }
 
 func receiver() {

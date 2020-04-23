@@ -8,12 +8,13 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 	"xclipboard/server"
 )
 
 type Client struct {
-	Cmd  *server.Command
+	Cmd *server.Command
 }
 
 var (
@@ -23,13 +24,13 @@ var (
 
 func (c *Client) Start() {
 	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%s", c.Cmd.Server, c.Cmd.Port), RawQuery: fmt.Sprintf("user=%s", c.Cmd.User)}
-	log.Printf("connecting to %s", u.String())
 	var dialer *websocket.Dialer
 	conn, _, err := dialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 		return
 	}
+	log.Printf("connected to %s", u.String())
 	defer conn.Close()
 	go work(conn)
 	receiver(conn)
@@ -73,21 +74,24 @@ func receiver(conn *websocket.Conn) {
 }
 
 func work(conn *websocket.Conn) {
-	defer close(done)
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("read:", err)
-			return
+			if strings.HasPrefix(err.Error(), "websocket: close") {
+				break
+			}
 		}
-		log.Printf("recv: %s", message)
 		s := string(message)
 		if s != lastText {
 			err := clipboard.WriteAll(s)
+			log.Printf("recv: %s apply", message)
 			if err != nil {
 				log.Println(err)
 			}
 			lastText = s
+		} else {
+			log.Printf("recv: %s ignore", message)
 		}
 	}
 }

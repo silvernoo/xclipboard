@@ -17,10 +17,10 @@ func main() {
 	flag.StringVar(&cmd.User, "u", "default", "user")
 	flag.Parse()
 	if cmd.IsServerMode() {
-		server := server.Server{Cmd: &cmd}
-		server.Start()
-	}else {
-		client := client.Client{Cmd: &cmd}
-		client.Start()
+		s := server.Server{Cmd: &cmd}
+		s.Start()
+	} else {
+		c := client.Client{Cmd: &cmd}
+		c.Start()
 	}
 }

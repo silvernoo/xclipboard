@@ -49,3 +49,8 @@ func (s *ClientSet) Remove(client *Client) {
 	}
 	s.conns[client.User] = append(conns[:i], conns[i+1:]...)
 }
+
+func (s *ClientSet) Close() {
+	close(s.MessageChan)
+	close(s.CloseChan)
+}

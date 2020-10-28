@@ -18,13 +18,11 @@ func main() {
 	flag.StringVar(&cmd.User, "u", "default", "user")
 	flag.Parse()
 	bytes := make([]byte, 32)
-	copy(bytes, []byte(key))
+	copy(bytes, key)
 	cmd.Key = bytes
 	if cmd.IsServerMode() {
-		s := server.Server{Cmd: &cmd}
-		s.Start()
+		(&server.Server{Cmd: &cmd}).Start()
 	} else {
-		c := client.Client{Cmd: &cmd}
-		c.Start()
+		(&client.Client{Cmd: &cmd}).Start()
 	}
 }

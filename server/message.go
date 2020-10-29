@@ -6,13 +6,13 @@ import (
 
 type Message struct {
 	RawContent []byte
-	User       string
+	Group      string
 }
 
 type Client struct {
-	Conn *websocket.Conn
-	User string
-	Cmd  *Command
+	Conn  *websocket.Conn
+	Group string
+	Cmd   *Command
 }
 
 type ClientSet struct {
@@ -40,14 +40,14 @@ func (s ClientSet) Conns(get string) []*websocket.Conn {
 }
 
 func (s *ClientSet) Remove(client *Client) {
-	conns := s.conns[client.User]
+	conns := s.conns[client.Group]
 	var i int
 	for i = 0; i < len(conns); i++ {
 		if conns[i] == client.Conn {
 			break
 		}
 	}
-	s.conns[client.User] = append(conns[:i], conns[i+1:]...)
+	s.conns[client.Group] = append(conns[:i], conns[i+1:]...)
 }
 
 func (s *ClientSet) Close() {

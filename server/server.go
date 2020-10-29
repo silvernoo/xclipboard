@@ -26,7 +26,8 @@ func receiver() {
 	for {
 		select {
 		case message := <-set.MessageChan:
-			conns := set.Conns(message.User)
+			conns := set.Conns(message.Group)
+			fmt.Println(len(conns))
 			for _, c := range conns {
 				err := c.WriteMessage(websocket.TextMessage, []byte(string(message.RawContent)))
 				if err != nil {
@@ -39,7 +40,6 @@ func receiver() {
 	}
 }
 
-//noinspection ALL
 func handle(writer http.ResponseWriter, request *http.Request) {
 	upgrader := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -49,15 +49,14 @@ func handle(writer http.ResponseWriter, request *http.Request) {
 		log.Panicln("upgrade:", err)
 		return
 	}
-	set.Add(request.URL.Query().Get("user"), c)
-
+	set.Add(request.URL.Query().Get("group"), c)
 	defer c.Close()
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
-			set.CloseChan <- &Client{User: request.URL.Query().Get("user"), Conn: c}
+			set.CloseChan <- &Client{Group: request.URL.Query().Get("group"), Conn: c}
 			break
 		}
-		set.MessageChan <- &Message{RawContent: message, User: request.URL.Query().Get("user")}
+		set.MessageChan <- &Message{RawContent: message, Group: request.URL.Query().Get("group")}
 	}
 }

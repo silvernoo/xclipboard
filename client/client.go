@@ -23,7 +23,7 @@ var (
 )
 
 func (c *Client) Start() {
-	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%s", c.Cmd.Server, c.Cmd.Port), RawQuery: fmt.Sprintf("user=%s", c.Cmd.User)}
+	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%s", c.Cmd.Server, c.Cmd.Port), RawQuery: fmt.Sprintf("group=%s", c.Cmd.Group)}
 	var dialer *websocket.Dialer
 	conn, _, err := dialer.Dial(u.String(), nil)
 	if err != nil {
@@ -52,11 +52,12 @@ func receiver(conn *websocket.Conn, key []byte) {
 				if err != nil {
 					log.Println(err)
 				}
-				encrypt, err := server.AesEncrypt([]byte(all), key)
+				//encrypt, err := server.AesEncrypt([]byte(all), key)
+				encrypt := all
 				if err != nil {
 					log.Panicln(err)
 				}
-				err = conn.WriteMessage(websocket.TextMessage, encrypt)
+				err = conn.WriteMessage(websocket.TextMessage, []byte(encrypt))
 				lastText = all
 				if err != nil {
 					log.Println(err)
@@ -86,7 +87,8 @@ func work(conn *websocket.Conn, key []byte) {
 				break
 			}
 		}
-		decrypt, err := server.AesDecrypt(message, key)
+		//decrypt, err := server.AesDecrypt(message, key)
+		decrypt := message
 		if err != nil {
 			log.Println(err)
 		}
